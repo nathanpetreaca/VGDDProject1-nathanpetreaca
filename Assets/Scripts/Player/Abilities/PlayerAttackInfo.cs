@@ -81,12 +81,12 @@ public class PlayerAttackInfo
 
 
     [SerializeField]
-    private int m_HeathCost;
-    public int HealthCost
+    private int m_PowerCost;
+    public int PowerCost
     {
         get
         {
-            return m_HeathCost;
+            return m_PowerCost;
         }
     }
 

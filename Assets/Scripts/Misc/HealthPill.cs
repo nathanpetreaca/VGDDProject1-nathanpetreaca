@@ -8,11 +8,22 @@ public class HealthPill : MonoBehaviour
 
     [SerializeField]
     private int m_HealthGain;
+
+    [SerializeField]
+    private int m_PowerGain;
     public int HealthGain
     {
         get
         {
             return m_HealthGain;
+        }
+    }
+
+    public int PowerGain
+    {
+        get
+        {
+            return m_PowerGain;
         }
     }
 

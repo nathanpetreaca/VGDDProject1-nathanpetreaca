@@ -21,6 +21,9 @@ public class PlayerController : MonoBehaviour
     private int m_MaxHealth;
 
     [SerializeField]
+    private int m_MaxPower;
+
+    [SerializeField]
     private HUDController m_HUD;
 
    
@@ -44,6 +47,8 @@ public class PlayerController : MonoBehaviour
     private Color p_DefaultColor;
 
     private float p_CurHealth;
+    private float p_CurPower;
+
 
     #endregion
 
@@ -62,6 +67,7 @@ public class PlayerController : MonoBehaviour
 
         p_FrozenTimer = 0;
         p_CurHealth = m_MaxHealth;
+        p_CurPower = 0;
         for(int i =0; i< m_Attacks.Length; i++)
         {
             PlayerAttackInfo attack = m_Attacks[i];
@@ -105,13 +111,29 @@ public class PlayerController : MonoBehaviour
             {
                 if (Input.GetButtonDown(attack.Button))
                 {
-                    p_FrozenTimer = attack.FrozenTime;
-                    DecreaseHealth(attack.HealthCost);
-                    StartCoroutine(UseAttack(attack));
+                    
+                    if (attack.AttackName.Equals("MegaLaser"))
+                    {
+                        if (p_CurPower > attack.PowerCost)
+                        {
+                            p_FrozenTimer = attack.FrozenTime;
+                            DecreasePower(attack.PowerCost);
+                            StartCoroutine(UseAttack(attack));
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        p_FrozenTimer = attack.FrozenTime;
+                        StartCoroutine(UseAttack(attack));
+                        break;
+                    }
                     break;
                 }
 
-            }else if(attack.Cooldown > 0)
+
+            }
+            else if(attack.Cooldown > 0)
             {
                 attack.Cooldown -= Time.deltaTime;
             }
@@ -194,6 +216,34 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
+
+    #region Power Methods
+
+    public void DecreasePower(float amount)
+    {
+        p_CurPower -= amount;
+        if (p_CurPower <= 0)
+        {
+            p_CurPower = 0;
+        }
+        m_HUD.UpdatePower(1.0f * p_CurPower / m_MaxPower);
+
+    }
+
+    public void IncreasePower(int amount)
+    {
+        p_CurPower += amount;
+        if (p_CurPower > m_MaxPower)
+        {
+            p_CurPower = m_MaxPower;
+        }
+        m_HUD.UpdatePower(1.0f * p_CurPower / m_MaxPower);
+    }
+
+
+
+    #endregion
+
     #region Attack Methods
     private IEnumerator UseAttack(PlayerAttackInfo attack)
     {
@@ -239,11 +289,26 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Collision Methods
+    /*
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("HealthPill"))
         {
             IncreaseHealth(other.GetComponent<HealthPill>().HealthGain);
+            Destroy(other.gameObject);
+        }
+    }
+    */
+
+    private void OnCollisionStay(Collision collision)
+    {
+        GameObject other = collision.collider.gameObject;
+        if (other.CompareTag("HealthPill"))
+        {
+            // DecreaseHealth(m_Damage);
+            IncreaseHealth(other.GetComponent<HealthPill>().HealthGain);
+            IncreasePower(other.GetComponent<HealthPill>().PowerGain);
+
             Destroy(other.gameObject);
         }
     }
